@@ -6,9 +6,9 @@ A module to exploit Foscam Foscam FI9821W/P/HD816W/P camera.
 
 # Python 3 support. Also print -> print().
 try:
-    from urllib import urlopen    
+    from urllib import urlopen
 except ImportError:
-    from urllib.request import urlopen   
+    from urllib.request import urlopen
 try:
     from urllib import urlencode
 except ImportError:
@@ -675,7 +675,7 @@ class FoscamCamera(object):
         '''
         self.set_motion_detection1(0)
 
-        
+
     def get_alarm_record_config(self, callback=None):
         '''
         Get alarm record config
@@ -795,21 +795,21 @@ class FoscamCamera(object):
         cmd: snapPicture2
         '''
         return self.execute_command('snapPicture2', {}, callback=callback, raw=True)
-        
+
     # ******************* SMTP Functions *********************
-    
+
     def set_smtp_config(self, params, callback=None):
         '''
-        Set smtp settings using the array of parameters 
+        Set smtp settings using the array of parameters
         '''
         return self.execute_command('setSMTPConfig', params, callback=callback)
-        
+
     def get_smtp_config(self, callback=None):
         '''
-        Get smtp settings using the array of parameters 
+        Get smtp settings using the array of parameters
         '''
         return self.execute_command('getSMTPConfig', callback=callback)
-        
+
     # ********************** Misc ****************************
 
     def get_log(self, offset, count=10, callback=None):
@@ -822,5 +822,3 @@ class FoscamCamera(object):
         '''
         params = {'offset': offset, 'count': count}
         return self.execute_command('getLog', params, callback=callback)
-        
-
