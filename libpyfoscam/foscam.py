@@ -27,6 +27,7 @@ except ImportError:
     ssl_enabled=False
 
 from collections import OrderedDict
+import re
 
 # Foscam error code.
 FOSCAM_SUCCESS           = 0
@@ -788,6 +789,28 @@ class FoscamCamera(object):
         return self.execute_command('setRecordPath', params, callback=callback)
 
     # *************** SnapPicture Function *******************
+
+    def snap_picture(self, callback=None):
+        '''
+        Manually request snapshot. Returns raw JPEG data.
+        cmd: snapPicture
+        '''
+        code, params = self.execute_command('snapPicture', {}, callback=callback, raw=True)
+        if code != FOSCAM_SUCCESS:
+            return code, params
+        html = params.decode('utf-8')
+        # parse HTML
+        match = re.search('<html><body><img src="\.\./([^"]+)"/></body></html>', html)
+        if match:
+            uri = match.group(1)
+            imgurl = f'http://{self.url}/{uri}'
+            try:
+                res = urlopen(imgurl, timeout=5)
+            except:
+                return ERROR_FOSCAM_UNAVAILABLE, None
+            if res.getcode() == 200:
+                return FOSCAM_SUCCESS, res.read()
+        return ERROR_FOSCAM_UNAVAILABLE, None
 
     def snap_picture_2(self, callback=None):
         '''
