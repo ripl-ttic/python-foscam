@@ -50,7 +50,7 @@ class FoscamError(Exception):
 class FoscamCamera(object):
     '''A python implementation of the foscam HD816W'''
 
-    def __init__(self, host, port, usr, pwd, daemon=False, ssl=None, verbose=True):
+    def __init__(self, host, port, usr, pwd, daemon=False, ssl=None, verbose=False):
         '''
         If ``daemon`` is True, the command will be sent unblockedly.
         '''
