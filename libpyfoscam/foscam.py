@@ -3,16 +3,22 @@ A module to exploit Foscam Foscam FI9821W/P/HD816W/P camera.
 
 2016-01-22 Python 3 update by https://github.com/markomanninen
 """
+import sys
+
+def log(s):
+    sys.stdout.write(s+'\n')
 
 # Python 3 support. Also print -> print().
 try:
-    from urllib import urlopen
+    from urllib import urlopen as _urlopen
 except ImportError:
-    from urllib.request import urlopen
+    from urllib.request import urlopen as _urlopen
+
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
+
 try:
     from urllib import unquote
 except ImportError:
@@ -29,6 +35,17 @@ except ImportError:
 from collections import OrderedDict
 import re
 
+
+if (sys.version_info > (3, 0)):
+    # Python 3
+    urlopen = _urlopen
+else:
+    # Python 2
+    def _urlopen_fcn(url, data=None, timeout=None, context=None):
+        return _urlopen(url, data=data, context=context)
+    urlopen = _urlopen_fcn
+
+
 # Foscam error code.
 FOSCAM_SUCCESS           = 0
 ERROR_FOSCAM_FORMAT      = -1
@@ -40,7 +57,7 @@ ERROR_FOSCAM_UNKNOWN     = -7  # -6 and -8 are reserved.
 ERROR_FOSCAM_UNAVAILABLE = -8  # Disconnected or not a cam.
 
 class FoscamError(Exception):
-    def __init__(self, code ):
+    def __init__(self, code):
         super(FoscamError, self).__init__()
         self.code = int(code)
 
@@ -92,22 +109,23 @@ class FoscamCamera(object):
 
         # Parse parameters from response string.
         if self.verbose:
-            print ('Send Foscam command: %s' % cmdurl)
+            log ('Send Foscam command: %s' % cmdurl)
         try:
             raw_string = ''
             if self.ssl and ssl_enabled:
                 gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)  # disable cert
-                raw_string = urlopen(cmdurl,context=gcontext, timeout=5).read()
+                raw_string = urlopen(cmdurl, context=gcontext, timeout=5).read()
             else:
-                raw_string = urlopen(cmdurl,timeout=5).read()
+                raw_string = urlopen(cmdurl, timeout=5).read()
             if raw:
                 if self.verbose:
-                    print ('Returning raw Foscam response: len=%d' % len(raw_string))
+                    log ('Returning raw Foscam response: len=%d' % len(raw_string))
                 return FOSCAM_SUCCESS, raw_string
             root = ET.fromstring(raw_string)
         except:
+            log (str(sys.exc_info()))
             if self.verbose:
-                print ('Foscam exception: ' + raw_string)
+                log ('Foscam exception: ' + raw_string)
             return ERROR_FOSCAM_UNAVAILABLE, None
         code = ERROR_FOSCAM_UNKNOWN
         params = OrderedDict()
@@ -119,7 +137,7 @@ class FoscamCamera(object):
                 params[child.tag] = unquote(child.text)
 
         if self.verbose:
-            print ('Received Foscam response: %s, %s' % (code, params))
+            log ('Received Foscam response: %s, %s' % (code, params))
         return code, params
 
     def execute_command(self, cmd, params=None, callback=None, raw=False):
@@ -803,7 +821,7 @@ class FoscamCamera(object):
         match = re.search('<html><body><img src="\.\./([^"]+)"/></body></html>', html)
         if match:
             uri = match.group(1)
-            imgurl = f'http://{self.url}/{uri}'
+            imgurl = 'http://%s/%s' % (self.url, uri)
             try:
                 res = urlopen(imgurl, timeout=5)
             except:
