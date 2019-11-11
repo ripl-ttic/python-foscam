@@ -113,6 +113,7 @@ class FoscamCamera(object):
                 return FOSCAM_SUCCESS, raw_string
             root = ET.fromstring(raw_string)
         except:
+            log (str(sys.exc_info()))
             if self.verbose:
                 log ('Foscam exception: ' + raw_string)
             return ERROR_FOSCAM_UNAVAILABLE, None
