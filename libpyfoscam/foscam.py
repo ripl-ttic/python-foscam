@@ -10,9 +10,9 @@ def log(s):
 
 # Python 3 support. Also print -> print().
 try:
-    from urllib import urlopen as _urlopen
+    from urllib2 import urlopen
 except ImportError:
-    from urllib.request import urlopen as _urlopen
+    from urllib2.request import urlopen
 
 try:
     from urllib import urlencode
@@ -34,16 +34,6 @@ except ImportError:
 
 from collections import OrderedDict
 import re
-
-
-if (sys.version_info > (3, 0)):
-    # Python 3
-    urlopen = _urlopen
-else:
-    # Python 2
-    def _urlopen_fcn(url, data=None, timeout=None, context=None):
-        return _urlopen(url, data=data, context=context)
-    urlopen = _urlopen_fcn
 
 
 # Foscam error code.
